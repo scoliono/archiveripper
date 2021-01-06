@@ -38,10 +38,11 @@ def main():
     logging.debug('attempting to start scheduler')
     client.schedule_loan_book(id)
 
-    dir = args.output_dir
-    dir = os.path.expanduser(dir)
     if not args.output_dir:
         dir = './' + id
+    else:
+        dir = os.path.expanduser(args.output_dir)
+
     logging.debug('creating output dir "%s"' % dir)
     if os.path.isdir(dir):
         response = input('Output folder %s already exists. Continue? ' \
