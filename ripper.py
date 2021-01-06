@@ -12,7 +12,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('id', nargs='?', 
         help='Look for the book\'s identifier (the part of the url immediately after "https://archive.org/details/").')
-    parser.add_argument('-u', '--username', help='Your archive.org account\'s email')
+    parser.add_argument('-d', '--output-dir', help='Directory you want the pages to be written to. If undefined the directory will be named the book id')
+    parser.add_argument('-u', '--username', help='Your archive.org account\'s email.')
     parser.add_argument('-p', '--password', help='Your archive.org account\'s password')
     args = parser.parse_args()
 
@@ -20,7 +21,7 @@ def main():
     username = args.username
     password = args.password
 
-    #If any of the credentials isn't specified with cmd args ask for it interactively
+    #If any of the credentials isn't specified with cmdline args ask for it interactively
     if not args.id:
         print('Look for the book\'s identifier (the part of the url immediately after "https://archive.org/details/").')
         id = input('Enter it here: ')
@@ -37,7 +38,9 @@ def main():
     logging.debug('attempting to start scheduler')
     client.schedule_loan_book(id)
 
-    dir = './' + id
+    dir=args.output-dir
+    if not args.output-dir
+        dir = './' + id
     logging.debug('creating output dir "%s"' % dir)
     if os.path.isdir(dir):
         response = input('Output folder %s already exists. Continue? ' \
