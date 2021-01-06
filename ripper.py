@@ -13,6 +13,7 @@ def main():
     parser.add_argument('id', nargs='?', 
         help='Look for the book\'s identifier (the part of the url immediately after "https://archive.org/details/").')
     parser.add_argument('-d', '--output-dir', help='Directory you want the pages to be written to. If undefined the directory will be named the book id')
+    parser.add_argument('-s', '--scale', default=0, type=int, help='Image resolution of the pages requested, can save bandwidth if the best image quality isn\'t necessary. Higher integers mean smaller resolution, default is 0 (no downscaling)')
     parser.add_argument('-u', '--username', help='Your archive.org account\'s email.')
     parser.add_argument('-p', '--password', help='Your archive.org account\'s password')
     args = parser.parse_args()
@@ -68,7 +69,7 @@ def main():
     for i in range(start, end):
         logging.debug('downloading page %d (index %d)' % (i + 1,
             i))
-        contents = client.download_page(i)
+        contents = client.download_page(i, str(args.scale))
         open('%s/%d.jpg' % (dir, i + 1), 'wb').write(contents)
         print('%d%% (%d/%d) done' % ((i + 1) / total * 100, i + 1, total))
 
