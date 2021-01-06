@@ -38,7 +38,8 @@ def main():
     logging.debug('attempting to start scheduler')
     client.schedule_loan_book(id)
 
-    dir=args.output_dir
+    dir = args.output_dir
+    dir = os.path.expanduser(dir)
     if not args.output_dir:
         dir = './' + id
     logging.debug('creating output dir "%s"' % dir)
@@ -67,7 +68,7 @@ def main():
         logging.debug('downloading page %d (index %d)' % (i + 1,
             i))
         contents = client.download_page(i)
-        open('./%s/%d.jpg' % (dir, i + 1), 'wb').write(contents)
+        open('%s/%d.jpg' % (dir, i + 1), 'wb').write(contents)
         print('%d%% (%d/%d) done' % ((i + 1) / total * 100, i + 1, total))
 
     print('done')
