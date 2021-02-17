@@ -130,7 +130,7 @@ class ArchiveReaderClient:
 
 
     # Downloads a single page of a book. Call fetch_book_metadata() first.
-    def download_page(self, i, scale="0"):
+    def download_page(self, i, scale=0):
         if not self.book_meta:
             logging.error('no book_meta; you must fetch the metadata first.')
             raise AssertionError
@@ -139,7 +139,7 @@ class ArchiveReaderClient:
             logging.error('page index out of range')
             raise IndexError
 
-        res = self.session.get(self.book_page_urls[i] + "&scale=%s" % scale, headers={
+        res = self.session.get(self.book_page_urls[i] + "&scale=%d" % scale, headers={
             'referer': self.URL_FORMAT % ('details/' + self.book_id)
         })
         return res.content

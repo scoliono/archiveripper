@@ -78,7 +78,7 @@ def main():
     for i in range(start, end):
         logging.debug('downloading page %d (index %d)' % (i + 1,
             i))
-        contents = client.download_page(i, str(args.scale))
+        contents = client.download_page(i, args.scale)
         open('%s/%d.jpg' % (dir, i + 1), 'wb').write(contents)
         print('%d%% (%d/%d) done' % ((i + 1) / total * 100, i + 1, total))
 
