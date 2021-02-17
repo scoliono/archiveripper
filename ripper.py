@@ -15,9 +15,10 @@ def main():
     parser.add_argument('-u', '--username', help='Your archive.org account\'s email.')
     parser.add_argument('-p', '--password', help='Your archive.org account\'s password')
     parser.add_argument('-a', '--all-pages', action='store_true', help='Download every page of the book')
-    parser.add_argument('-r', '--page-range', help='Download pages within a range (eg. 1-15)')
+    parser.add_argument('-s', '--page-start', type=int, help='Download pages starting at page number N and ending at the book\'s last page, or a range if --page-end has been specified')
+    parser.add_argument('-e', '--page-end', type=int, help='End of the range of page numbers to download')
     parser.add_argument('-d', '--output-dir', help='Directory you want the pages to be written to. If undefined the directory will be named the book id')
-    parser.add_argument('-s', '--scale', default=0, type=int, help='Image resolution of the pages requested, can save bandwidth if the best image quality isn\'t necessary. Higher integers mean smaller resolution, default is 0 (no downscaling)')
+    parser.add_argument('-S', '--scale', default=0, type=int, help='Image resolution of the pages requested, can save bandwidth if the best image quality isn\'t necessary. Higher integers mean smaller resolution, default is 0 (no downscaling)')
     args = parser.parse_args()
 
     id = args.id
@@ -56,22 +57,23 @@ def main():
         os.mkdir(dir)
 
     page_count = client.fetch_book_metadata()
+
+    start = 0
+    end = page_count
+
     if not args.all_pages:
-        if not args.page_range:
+        if not args.page_start and not args.page_end:
             print('The book is %d pages long. Which pages do you want?' % page_count)
             desired_pages = input('Enter a range (eg. 1-15) or leave blank for all: ')
-        else:
-            desired_pages = args.page_range
-    else:
-        desired_pages = ''
 
-    if desired_pages:
-        [start, end] = desired_pages.split('-')
-        start = int(start) - 1
-        end = int(end) - 1
-    else:
-        start = 0
-        end = page_count
+            if desired_pages:
+                [start, end] = desired_pages.split('-')
+                start = int(start) - 1
+                end = int(end)
+        else:
+            if args.page_start: start = args.page_start - 1
+            if args.page_end: end = args.page_end
+
     logging.debug('planning on fetching pages %d thru %d' % (start, end))
 
     total = end - start
