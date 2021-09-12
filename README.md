@@ -15,8 +15,6 @@ Do not use this program in an illegal manner. Thanks!
 
 ## Planned Features
 
-- Hidden password entry
-
 - Searching for books instead of inputting id directly
 
 - GUI

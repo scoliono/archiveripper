@@ -2,7 +2,7 @@
 # Copyright (c) 2020  James Shiffer
 # This file contains the main application logic.
 
-import argparse, api, logging, os, sys
+import argparse, api, getpass, logging, os, sys
 
 def main():
     client = api.ArchiveReaderClient()
@@ -10,7 +10,7 @@ def main():
 
     # Parse book id and credentials
     parser = argparse.ArgumentParser()
-    parser.add_argument('id', nargs='?', 
+    parser.add_argument('id', nargs='?',
         help='Look for the book\'s identifier (the part of the url immediately after "https://archive.org/details/").')
     parser.add_argument('-u', '--username', help='Your archive.org account\'s email.')
     parser.add_argument('-p', '--password', help='Your archive.org account\'s password')
@@ -33,7 +33,7 @@ def main():
     if not args.username:
         username = input('Enter your archive.org email: ')
     if not args.password:
-        password = input('Enter your archive.org password: ')
+        password = getpass.getpass('Enter your archive.org password: ')
 
 
     logging.debug('attempting login with user-supplied credentials')
@@ -82,7 +82,8 @@ def main():
             i))
         contents = client.download_page(i, args.scale)
         open('%s/%d.jpg' % (dir, i + 1), 'wb').write(contents)
-        print('%d%% (%d/%d) done' % ((i + 1) / total * 100, i + 1, total))
+        done_count = i + 1 - start
+        print('%d%% (%d/%d) done' % (done_count / total * 100, done_count, total))
 
     print('done')
     sys.exit()
