@@ -2,7 +2,7 @@
 # Copyright (c) 2020  James Shiffer
 # This file contains the main application logic.
 
-import argparse, api, getpass, logging, os, sys
+import argparse, api, getpass, logging, os, random, sys, time
 
 def main():
     client = api.ArchiveReaderClient()
@@ -18,6 +18,8 @@ def main():
     parser.add_argument('-s', '--page-start', type=int, help='Download pages starting at page number N and ending at the book\'s last page, or a range if --page-end has been specified')
     parser.add_argument('-e', '--page-end', type=int, help='End of the range of page numbers to download')
     parser.add_argument('-d', '--output-dir', help='Directory you want the pages to be written to. If undefined the directory will be named the book id')
+    parser.add_argument('-nt', '--no-timeout', action='store_true', help='Don\'t wait a few seconds between each image request. The default behaviour is to wait because if we request one image after the other with no timeout in between archive.org will typically drop the connection.')
+    parser.add_argument('-R', '--redownload', action='store_true', help='Redownloads pages even if they\'re already on disk')
     parser.add_argument('-S', '--scale', default=0, type=int, help='Image resolution of the pages requested, can save bandwidth if the best image quality isn\'t necessary. Higher integers mean smaller resolution, default is 0 (no downscaling)')
     args = parser.parse_args()
 
@@ -77,15 +79,28 @@ def main():
     logging.debug('planning on fetching pages %d thru %d' % (start, end))
 
     total = end - start
-    for i in range(start, end):
-        logging.debug('downloading page %d (index %d)' % (i + 1,
-            i))
-        contents = client.download_page(i, args.scale)
-        with open('%s/%d.jpg' % (dir, i + 1), 'wb') as file:
-            file.write(contents)
-        done_count = i + 1 - start
-        print('%d%% (%d/%d) done' % (done_count / total * 100, done_count, total))
 
+    for i in range(start, end):
+        savepath='%s/%d.jpg' % (dir, i + 1)
+        savepathnext='%s/%d.jpg' % (dir, i + 2)
+        logging.debug('downloading page %d (index %d)' % (i + 1, i))
+
+        #the logic here may seem complicated but it just checks if the file already exists before writing and
+        #downloads the last saved page even it exists because writing to file could've been interrupted
+        if (args.redownload or
+                (not os.path.isfile(savepath) or
+                    (os.path.isfile(savepath) and not os.path.isfile(savepathnext)))):
+            contents = client.download_page(i, str(args.scale))
+            open(savepath, 'wb').write(contents)
+            print('%d%% (%d/%d) done' % ((i + 1) / total * 100, i + 1, total))
+
+            #wait a little between requests otherwise they'll block us
+            if not args.no_timeout:
+                sleeptime=random.uniform(1,3)
+                time.sleep(sleeptime)
+                logging.debug('waiting %.1f sec between requests' % sleeptime)
+        else:
+            print('%d%% (%d/%d) already on disk, skipping' % ((i + 1) / total * 100, i + 1, total))
     print('done')
 
 if __name__ == '__main__':
