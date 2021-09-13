@@ -98,5 +98,7 @@ def main():
             print('%d%% (%d/%d) already on disk, skipping' % ((i + 1) / total * 100, i + 1, total))
     print('done')
 
+    client.return_book(id)
+
 if __name__ == '__main__':
     main()

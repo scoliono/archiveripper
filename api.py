@@ -162,3 +162,15 @@ class ArchiveReaderClient:
             raise AssertionError
         else:
             logging.debug('user has logged in successfully')
+
+    def return_book(self, book_id):
+        url = self.URL_FORMAT % 'services/loans/loan/'
+        res = self.session.post(url, {
+            'action': 'return_loan',
+            'identifier': book_id
+        })
+        json = res.json()
+        if 'success' not in json:
+            err = json['error'] if 'error' in json else 'unknown error'
+            logging.error('error with action return_loan: %s' % err)
+            raise AssertionError
