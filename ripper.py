@@ -85,7 +85,7 @@ def main():
         if (args.redownload or
                 (not os.path.isfile(savepath) or
                     (os.path.isfile(savepath) and not os.path.isfile(savepathnext)))):
-            contents = client.download_page(i, str(args.scale))
+            contents = client.download_page(i, args.scale)
             open(savepath, 'wb').write(contents)
             print('%d%% (%d/%d) done' % ((i + 1) / total * 100, i + 1, total))
 
