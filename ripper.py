@@ -50,12 +50,7 @@ def main():
         dir = os.path.expanduser(args.output_dir)
 
     logging.debug('creating output dir "%s"' % dir)
-    if os.path.isdir(dir):
-        response = input('Output folder %s already exists. Continue? ' \
-            % dir)
-        if not response.lower().startswith('y'):
-            return
-    else:
+    if not os.path.isdir(dir):
         os.mkdir(dir)
 
     page_count = client.fetch_book_metadata()
