@@ -81,12 +81,12 @@ def main():
         logging.debug('downloading page %d (index %d)' % (i + 1,
             i))
         contents = client.download_page(i, args.scale)
-        open('%s/%d.jpg' % (dir, i + 1), 'wb').write(contents)
+        with open('%s/%d.jpg' % (dir, i + 1), 'wb') as file:
+            file.write(contents)
         done_count = i + 1 - start
         print('%d%% (%d/%d) done' % (done_count / total * 100, done_count, total))
 
     print('done')
-    sys.exit()
 
 if __name__ == '__main__':
     main()

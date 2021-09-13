@@ -2,7 +2,7 @@
 # Copyright (c) 2020  James Shiffer
 # This file contains all the API calls made to archive.org.
 
-import logging, re, requests, threading
+import logging, re, requests, sched, time
 
 class ArchiveReaderClient:
 
@@ -14,6 +14,7 @@ class ArchiveReaderClient:
         self.book_page_urls = []
         self.token = None
         self.URL_FORMAT = 'https://archive.org/%s'
+        self.timer = sched.scheduler(time.time, time.sleep)
 
 
     # Borrows a book. You should use the scheduler instead of calling this
@@ -72,25 +73,19 @@ class ArchiveReaderClient:
             self.token = json['token']
 
 
+    # Performs one renewal and schedules the next one for two minutes in the future.
+    def schedule_renew_book(self):
+        logging.debug('time is %d, time to renew book again' % time.time())
+        self.renew_book()
+        self.timer.enter(120, 1, self.schedule_renew_book)
+
+
     # Borrows a book and then automatically renews it every two minutes.
     def schedule_loan_book(self, book_id):
         # first, borrow & renew the book once
         logging.debug('scheduler running borrow/renew for the first time')
         self.borrow_book(book_id)
-        self.renew_book()
-
-        def set_interval(func, delay):
-            def callback():
-                set_interval(func, delay)
-                logging.debug('%ds have passed, time to renew book again' \
-                    % delay)
-                func()
-            t = threading.Timer(delay, callback)
-            t.start()
-            return t
-
-        # repeat the renewal process
-        set_interval(self.renew_book, 120)
+        self.schedule_renew_book()
 
 
     # Finds the book metadata, including book title and page URLs, and
