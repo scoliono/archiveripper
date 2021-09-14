@@ -1,8 +1,9 @@
 # ripper.py
 # Copyright (c) 2020  James Shiffer
-# This file contains the main application logic.
+# This file contains the command-line version of archiveripper.
 
-import argparse, api, getpass, logging, os, sys
+import argparse, getpass, logging, os
+from archiveripper import api
 
 def main():
     client = api.ArchiveReaderClient()
