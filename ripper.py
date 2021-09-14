@@ -74,6 +74,7 @@ def main():
     logging.debug('planning on fetching pages %d thru %d' % (start, end))
 
     total = end - start
+    completed = 0
 
     for i in range(start, end):
         savepath='%s/%d.jpg' % (dir, i + 1)
@@ -87,7 +88,9 @@ def main():
                     (os.path.isfile(savepath) and not os.path.isfile(savepathnext)))):
             contents = client.download_page(i, args.scale)
             open(savepath, 'wb').write(contents)
-            print('%d%% (%d/%d) done' % ((i + 1) / total * 100, i + 1, total))
+
+            completed += 1
+            print('Got %s (%d/%d)' % (savepath, completed, total))
 
             #wait a little between requests otherwise they'll block us
             if not args.no_timeout:
@@ -96,7 +99,7 @@ def main():
                 logging.debug('waiting %.1f sec between requests' % sleeptime)
         else:
             print('%d%% (%d/%d) already on disk, skipping' % ((i + 1) / total * 100, i + 1, total))
-    print('done')
+    print('Done.')
 
     client.return_book(id)
 
