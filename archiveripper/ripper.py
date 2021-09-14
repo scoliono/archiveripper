@@ -1,5 +1,4 @@
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QMainWindow, QMessageBox
 
 from .api import ArchiveReaderClient
