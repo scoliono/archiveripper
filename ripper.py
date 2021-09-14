@@ -98,7 +98,7 @@ def main():
                 time.sleep(sleeptime)
                 logging.debug('waiting %.1f sec between requests' % sleeptime)
         else:
-            print('%d%% (%d/%d) already on disk, skipping' % ((i + 1) / total * 100, i + 1, total))
+            print('%s (%d/%d) already on disk, skipping' % (savepath, completed, total))
     print('Done.')
 
     client.return_book(id)
