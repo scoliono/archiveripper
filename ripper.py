@@ -32,6 +32,7 @@ def main():
         id = input('Enter it here: ')
         logging.debug('received book ID: %s' % id)
     if not args.username:
+        # Check if the email and password of user are stored in config file
         if config['email']:
             username = config['email']
         else:
@@ -84,14 +85,36 @@ def main():
     logging.debug('planning on fetching pages %d thru %d' % (start, end))
 
     total = end - start
+    failed_pages = []
+
     for i in range(start, end):
         logging.debug('downloading page %d (index %d)' % (i + 1,
             i))
-        contents = client.download_page(i, args.scale)
+        try:
+            contents = client.download_page(i, args.scale)
+        except Exception as e:
+            # Retry once if the download fails
+            try:
+                print('Failed to download page %d, retrying once...' % (i + 1))
+                contents = client.download_page(i, args.scale)
+            except Exception as e:
+                # Retry twice if the download failed again
+                print('Failed to download page %d, retrying twice...' % (i + 1))
+                try:
+                    contents = client.download_page(i, args.scale)
+                except Exception as e:
+                    print('Failed to download page %d' % (i + 1))
+                    failed_pages.append(i + 1)
+                continue
+        
         with open('%s/%d.jpg' % (dir, i + 1), 'wb') as file:
             file.write(contents)
         done_count = i + 1 - start
         print('%d%% (%d/%d) done' % (done_count / total * 100, done_count, total))
+
+    if failed_pages:
+        print('Failed to download the following pages:')
+        print(failed_pages)
 
     print('done')
 
