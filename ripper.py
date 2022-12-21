@@ -4,6 +4,7 @@
 
 import argparse, api, getpass, logging, os, sys
 from config import config
+import stitcher
 
 def main():
     client = api.ArchiveReaderClient()
@@ -116,6 +117,8 @@ def main():
         print('Failed to download the following pages:')
         print(failed_pages)
 
+    # Stitch the pages together
+    stitcher.stitch(dir, id)
     print('done')
 
 if __name__ == '__main__':
