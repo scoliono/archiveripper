@@ -27,6 +27,7 @@ Do not use this program in an illegal manner. Thanks!
 
 ## Planned Features
 
+- Apply OCR on the stitched PDF
 - Searching for books instead of inputting id directly
 - GUI
 - Option to convert epub
