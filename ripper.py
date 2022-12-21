@@ -3,6 +3,7 @@
 # This file contains the main application logic.
 
 import argparse, api, getpass, logging, os, sys
+from config import config
 
 def main():
     client = api.ArchiveReaderClient()
@@ -31,9 +32,15 @@ def main():
         id = input('Enter it here: ')
         logging.debug('received book ID: %s' % id)
     if not args.username:
-        username = input('Enter your archive.org email: ')
+        if config['email']:
+            username = config['email']
+        else:
+            username = input('Enter your archive.org email: ')
     if not args.password:
-        password = getpass.getpass('Enter your archive.org password: ')
+        if config['password']:
+            password = config['password']
+        else:
+            password = getpass.getpass('Enter your archive.org password: ')
 
 
     logging.debug('attempting login with user-supplied credentials')
