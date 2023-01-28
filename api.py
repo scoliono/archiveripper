@@ -2,7 +2,7 @@
 # Copyright (c) 2020  James Shiffer
 # This file contains all the API calls made to archive.org.
 
-import logging, re, requests, sched, time
+import logging, re, requests, sched, time, json
 
 class ArchiveReaderClient:
 
@@ -29,9 +29,9 @@ class ArchiveReaderClient:
             'action': 'browse_book',
             'identifier': book_id
         })
-        json = res.json()
-        if 'success' not in json:
-            err = json['error'] if 'error' in json else 'unknown error'
+        json_res = res.json()
+        if 'success' not in json_res:
+            err = json_res['error'] if 'error' in json_res else 'unknown error'
             logging.error('error with action browse_book: %s' % err)
             raise AssertionError
 
@@ -40,14 +40,14 @@ class ArchiveReaderClient:
             'action': 'grant_access',
             'identifier': book_id
         })
-        json = res.json()
-        if 'success' not in json:
-            err = json['error'] if 'error' in json else 'unknown error'
+        json_res = res.json()
+        if 'success' not in json_res:
+            err = json_res['error'] if 'error' in json_res else 'unknown error'
             logging.error('error with action grant_access: %s' % err)
             raise AssertionError
         else:
-            logging.debug('received book token: %s' % json['value'])
-            self.token = json['value']
+            logging.debug('received book token: %s' % json_res['value'])
+            self.token = json_res['value']
 
 
     # Renews a loaned book, which must be borrowed before calling this method.
@@ -63,14 +63,14 @@ class ArchiveReaderClient:
             'action': 'create_token',
             'identifier': self.book_id
         })
-        json = res.json()
-        if 'success' not in json:
-            err = json['error'] if 'error' in json else 'unknown error'
+        json_res = res.json()
+        if 'success' not in json_res:
+            err = json_res['error'] if 'error' in json_res else 'unknown error'
             logging.error('error renewing book: %s' % err)
             raise AssertionError
         else:
-            logging.debug('renewed book token: %s' % json['token'])
-            self.token = json['token']
+            logging.debug('renewed book token: %s' % json_res['token'])
+            self.token = json_res['token']
 
 
     # Performs one renewal and schedules the next one for two minutes in the future.
@@ -104,14 +104,18 @@ class ArchiveReaderClient:
             logging.error('regex found no paths for BookReaderJSIA.php!')
             raise AssertionError
 
+
+        # fix InvalidURL (No host supplied) error due to updated json response on archive.org
+        details_url = json.loads(match.group(1))
+        details_url = details_url['url']
         # call the endpoint and viola, we have all the info we could ever
         # want about our book.
-        res = self.session.get('https:' + match.group(1))
-        json = res.json()
-        if 'data' not in json:
+        res = self.session.get('https:' + details_url)
+        json_res = res.json()
+        if 'data' not in json_res:
             logging.error('expected data in JSIA response but got none')
             raise AssertionError
-        self.book_meta = json['data']
+        self.book_meta = json_res['data']
         logging.debug('title: %s, imagecount: %s' % (
             self.book_meta['metadata']['title'],
             self.book_meta['metadata']['imagecount']
@@ -155,10 +159,22 @@ class ArchiveReaderClient:
         }, headers={
             'referer': self.URL_FORMAT % 'account/login'
         })
-        json = res.json()
-        if json['status'] != 'ok':
+        json_res = res.json()
+        if json_res['status'] != 'ok':
             logging.error('login responded with status %s, message %s' % \
-                (json['status'], json['message']))
+                (json_res['status'], json_res['message']))
             raise AssertionError
         else:
             logging.debug('user has logged in successfully')
+
+    def return_book(self, book_id):
+        url = self.URL_FORMAT % 'services/loans/loan/'
+        res = self.session.post(url, {
+            'action': 'return_loan',
+            'identifier': book_id
+        })
+        json_res = res.json()
+        if 'success' not in json_res:
+            err = json_res['error'] if 'error' in json_res else 'unknown error'
+            logging.error('error with action return_loan: %s' % err)
+            raise AssertionError
