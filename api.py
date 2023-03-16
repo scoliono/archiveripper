@@ -3,6 +3,7 @@
 # This file contains all the API calls made to archive.org.
 
 import logging, re, requests, sched, time
+from json import loads
 
 class ArchiveReaderClient:
 
@@ -106,7 +107,7 @@ class ArchiveReaderClient:
 
         # call the endpoint and viola, we have all the info we could ever
         # want about our book.
-        res = self.session.get('https:' + match.group(1))
+        res = self.session.get('https:' + loads(match.group(1))['url'])
         json = res.json()
         if 'data' not in json:
             logging.error('expected data in JSIA response but got none')
