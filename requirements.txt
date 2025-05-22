@@ -1,6 +1,8 @@
-certifi==2023.7.22
-chardet==3.0.4
-idna==2.10
-lxml==4.9.3
-requests==2.24.0
-urllib3==1.25.11
+certifi==2025.4.26
+charset-normalizer==3.4.2
+idna==3.10
+lxml==5.4.0
+pycryptodome==3.23.0
+requests==2.32.3
+tqdm==4.67.1
+urllib3==2.4.0
