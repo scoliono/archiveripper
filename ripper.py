@@ -2,7 +2,7 @@
 # Copyright (c) 2020  James Shiffer
 # This file contains the main application logic.
 
-import argparse, api, getpass, logging, os, sys
+import argparse, api, getpass, logging, os, sys, tqdm
 
 def main():
     client = api.ArchiveReaderClient()
@@ -77,14 +77,13 @@ def main():
     logging.debug('planning on fetching pages %d thru %d' % (start, end))
 
     total = end - start
-    for i in range(start, end):
+    for i in tqdm.tqdm(range(start, end)):
         logging.debug('downloading page %d (index %d)' % (i + 1,
             i))
         contents = client.download_page(i, args.scale)
         with open('%s/%d.jpg' % (dir, i + 1), 'wb') as file:
             file.write(contents)
         done_count = i + 1 - start
-        print('%d%% (%d/%d) done' % (done_count / total * 100, done_count, total))
 
     print('done')
 
