@@ -1,8 +1,14 @@
 certifi==2025.4.26
 charset-normalizer==3.4.2
+Deprecated==1.2.18
 idna==3.10
+img2pdf==0.6.1
 lxml==5.4.0
+packaging==25.0
+pikepdf==9.7.0
+pillow==11.2.1
 pycryptodome==3.23.0
 requests==2.32.3
 tqdm==4.67.1
 urllib3==2.4.0
+wrapt==1.17.2

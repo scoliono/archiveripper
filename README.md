@@ -13,10 +13,20 @@ Do not use this program in an illegal manner. Thanks!
 ![](./screenshot.png)
 ![](./explorer.png)
 
+## Dependencies
+
+Install the Python dependencies (creating a virtual environment first is recommended):
+
+```sh
+pip install -r requirements.txt
+```
+
+## Usage
+
+Run `python ripper.py -h` to get a list of all possible command line options.
+
 ## Planned Features
 
 - Searching for books instead of inputting id directly
 
 - GUI
-
-- Option to convert to pdf or epub instead of saving each page individually

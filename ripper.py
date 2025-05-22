@@ -2,7 +2,8 @@
 # Copyright (c) 2020  James Shiffer
 # This file contains the main application logic.
 
-import argparse, api, getpass, logging, os, sys, tqdm
+import argparse, api, getpass, img2pdf, logging, os, sys, tqdm
+
 
 def main():
     client = api.ArchiveReaderClient()
@@ -17,6 +18,7 @@ def main():
     parser.add_argument('-a', '--all-pages', action='store_true', help='Download every page of the book')
     parser.add_argument('-s', '--page-start', type=int, help='Download pages starting at page number N and ending at the book\'s last page, or a range if --page-end has been specified')
     parser.add_argument('-e', '--page-end', type=int, help='End of the range of page numbers to download')
+    parser.add_argument('-f', '--format', choices=['pdf'], help='Converts the individual pages into a single file. Currently only PDF is supported')
     parser.add_argument('-d', '--output-dir', help='Directory you want the pages to be written to. If undefined the directory will be named the book id')
     parser.add_argument('-S', '--scale', default=0, type=int, help='Image resolution of the pages requested, can save bandwidth if the best image quality isn\'t necessary. Higher integers mean smaller resolution, default is 0 (no downscaling)')
     args = parser.parse_args()
@@ -43,18 +45,18 @@ def main():
     client.schedule_loan_book(id)
 
     if not args.output_dir:
-        dir = './' + id
+        dirname = './' + id
     else:
-        dir = os.path.expanduser(args.output_dir)
+        dirname = os.path.expanduser(args.output_dir)
 
-    logging.debug('creating output dir "%s"' % dir)
-    if os.path.isdir(dir):
+    logging.debug('creating output dir "%s"' % dirname)
+    if os.path.isdir(dirname):
         response = input('Output folder %s already exists. Continue? ' \
-            % dir)
+            % dirname)
         if not response.lower().startswith('y'):
             return
     else:
-        os.mkdir(dir)
+        os.mkdir(dirname)
 
     page_count = client.fetch_book_metadata()
 
@@ -81,9 +83,25 @@ def main():
         logging.debug('downloading page %d (index %d)' % (i + 1,
             i))
         contents = client.download_page(i, args.scale)
-        with open('%s/%d.jpg' % (dir, i + 1), 'wb') as file:
+        with open('%s/%d.jpg' % (dirname, i + 1), 'wb') as file:
             file.write(contents)
         done_count = i + 1 - start
+
+    if args.format == 'pdf':
+        print('converting images to pdf')
+        img_list = ['%s/%d.jpg' % (dirname, i + 1) for i in range(start, end)]
+        with open('%s.pdf' % dirname, 'wb') as pdf:
+            pdf_data = img2pdf.convert(img_list)
+            pdf.write(pdf_data)
+            print('wrote %d pages to %s.pdf' % (total, dirname))
+        logging.debug('removing temporary image files')
+        for img_name in img_list:
+            os.remove(img_name)
+        try:
+            os.rmdir(dirname)
+            print('removed output dir %s' % dirname)
+        except OSError:
+            logging.warning('unable to remove output dir %s; it may not be empty' % dirname)
 
     print('done')
 
